@@ -84,7 +84,7 @@ stages:
           AdditionalArguments: '/p:IncludeCompositeObjects=true'
 
 - stage: DeployAzureDB
-  dependsOn: AzureBuild
+  dependsOn: Build
   displayName: 'Deploy to Azure SQL DB'
 
   jobs:
