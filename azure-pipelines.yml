@@ -119,5 +119,5 @@ stages:
           deployType: 'DacpacTask'
           DeploymentAction: 'Publish'
           DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
-          AdditionalArguments: '/p:IncludeCompositeObjects=true /p:TargetEngineVersion=Latest'
+          AdditionalArguments: '/p:IncludeCompositeObjects=true'
           IpDetectionMethod: 'AutoDetect'
