@@ -110,7 +110,7 @@ stages:
       - task: SqlAzureDacpacDeployment@1
         displayName: 'Install DACPAC on Azure SQL DB'
         inputs:
-          azureSubscription: 'Visual Studio Professional(de86e7f8-bff9-483c-9b7f-da7cc53ebc80)'
+          azureSubscription: 'Visual Studio Enterprise Subscription(170486b8-8385-407d-86a6-cff8864ec100)'
           AuthenticationType: 'server'
           ServerName: 'kcdemosrv.database.windows.net'
           DatabaseName: '$(azuredatabase)'
