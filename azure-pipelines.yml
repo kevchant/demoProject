@@ -45,6 +45,6 @@ stages:
       - task: PublishBuildArtifacts@1
         displayName: 'Publish SQL2019 artifact'
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\2019'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
           ArtifactName: $(artifactname)
           publishLocation: 'Container'
