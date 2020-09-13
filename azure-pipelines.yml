@@ -37,7 +37,6 @@ stages:
         inputs:
           Contents: |
             **\bin\$(configuration)\*.*
-            **
           TargetFolder: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
           FlattenFolders: true
           OverWrite: true
@@ -49,3 +48,37 @@ stages:
           ArtifactName: $(artifactname)
           publishLocation: 'Container'
 
+- stage: SQL2019
+  displayName: 'Local SQL Server 2019 deployment'
+
+  jobs:
+    - job: 'Deploy2019'
+      displayName: 'Deploy SQL Server 2019'
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
+        datadacpacfile: $kcdemoproject.dacpac
+
+      pool: $(agentpool)
+        
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Dowload Artifacts'
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          downloadPath: '$(System.ArtifactsDirectory)'
+
+      - task: SqlDacpacDeploymentOnMachineGroup@0
+        displayName: 'Install DACPAC'
+        inputs:
+          TaskType: 'dacpac'
+          DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
+          TargetMethod: 'server'
+          ServerName: 'localhost,1443'
+          DatabaseName: '$(database)'
+          AuthScheme: 'sqlServerAuthentication'
+          SqlUsername: 'sa'
+          SqlPassword: $(sqlsapw)
+          AdditionalArguments: '/p:IncludeCompositeObjects=true'
