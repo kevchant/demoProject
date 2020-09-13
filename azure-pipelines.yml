@@ -58,7 +58,7 @@ stages:
         variables:
         agentpool: 'kchant DevOps Duet'
         dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
-        datadacpacfile: $kcdemoproject.dacpac
+        datadacpacfile: kcdemoproject.dacpac
 
       pool: $(agentpool)
         
