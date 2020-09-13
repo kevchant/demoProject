@@ -2,6 +2,7 @@ CREATE VIEW [SalesLT].[vGetAllCategories]
 WITH SCHEMABINDING
 AS
 -- Returns the CustomerID, first name, and last name for the specified customer.
+--Test comment
 WITH CategoryCTE([ParentProductCategoryID], [ProductCategoryID], [Name]) AS
 (
     SELECT [ParentProductCategoryID], [ProductCategoryID], [Name]
