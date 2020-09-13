@@ -49,11 +49,11 @@ stages:
           publishLocation: 'Container'
 
 - stage: SQL2019
-  displayName: 'Local SQL Server 2019 deployment'
+  displayName: 'Local SQL Server 2019 update'
 
   jobs:
     - job: 'Deploy2019'
-      displayName: 'Deploy SQL Server 2019'
+      displayName: 'Update SQL Server 2019 database'
       variables:
         variables:
         agentpool: 'kchant DevOps Duet'
