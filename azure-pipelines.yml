@@ -1,0 +1,50 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+variables:
+  configuration: release
+  sqlinstance: localhost
+  database: SQL2019DB
+  azuredatabase: Azure-Data
+  artifactname: SQL2019
+  azureartifactname: AzureSQLDB
+
+trigger:
+- master
+-main
+-kcdemobranch
+
+stages:
+- stage: Build
+
+  jobs:
+    - job: 'Solution'
+
+      pool:
+        vmImage: vs2017-win2016
+
+      steps:
+      - task: VSBuild@1
+        displayName: 'Build kcdemoproject for SQL Server 2019'
+        inputs:
+          solution: kcdemodbproject.sqlproj
+          configuration: $(configuration)
+
+      - task: CopyFiles@2
+        displayName: "Copy files to SQL2019 artifact subfolder"
+        inputs:
+          Contents: |
+            **\bin\$(configuration)\*.*
+            **\*.publish.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\SQL2019'
+          FlattenFolders: true
+          OverWrite: true
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish SQL2019 artifact'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: $(artifactname)
+          publishLocation: 'Container'
