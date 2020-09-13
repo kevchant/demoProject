@@ -37,7 +37,7 @@ stages:
         inputs:
           Contents: |
             **\bin\$(configuration)\*.*
-            **\bin\*.publish.xml
+            **
           TargetFolder: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
           FlattenFolders: true
           OverWrite: true
