@@ -18,7 +18,7 @@ trigger:
 
 stages:
 - stage: Build
-
+  displayName: 'Build SQL 2019 dacpac'
   jobs:
     - job: 'Solution'
 
@@ -37,14 +37,15 @@ stages:
         inputs:
           Contents: |
             **\bin\$(configuration)\*.*
-            **\*.publish.xml
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\SQL2019'
+            *.publish.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
           FlattenFolders: true
           OverWrite: true
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish SQL2019 artifact'
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\SQL2019'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
           ArtifactName: $(artifactname)
           publishLocation: 'Container'
+
