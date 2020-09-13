@@ -13,8 +13,8 @@ variables:
 
 trigger:
 - master
--main
--kcdemobranch
+- main
+- kcdemobranch
 
 stages:
 - stage: Build
