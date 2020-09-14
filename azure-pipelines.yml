@@ -7,7 +7,7 @@ variables:
   configuration: release
   sqlinstance: localhost
   database: SQL2019DB
-  azuredatabase: Azure-Data
+  azuredatabase: AzureDB
   artifactname: SQL2019
   azureartifactname: AzureSQLDB
 
@@ -83,6 +83,83 @@ stages:
           SqlPassword: $(sqlsapw)
           AdditionalArguments: '/p:IncludeCompositeObjects=true'
 
+- stage: AzureBuild
+  dependsOn: Build
+  displayName: 'Build Azure SQL DB dacpac file'
+
+  jobs:
+    - job: 'BuildAzureSQLDB'
+      displayName: 'Build Azure SQL DB dacpac'
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+        sourcepath: $(database)-Data
+        stagingarea: $(Build.ArtifactStagingDirectory)\staging
+        destinationpath: $(azuredatabase)
+        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
+        datadacpacfile: $(azuredatabase).dacpac
+        datapublishfile: $(dacpacpath)/$(azuredatabase).publish.xml
+
+      pool: $(agentpool)
+        
+      steps:
+      - task: CopyFiles@2
+        displayName: "Copy sqlproj to staging area for Azure-Data"
+        inputs:
+          Contents: |
+            $(azuredatabase)\*.sqlproj
+          TargetFolder: '$(stagingarea)'
+          FlattenFolders: true
+          OverWrite: true
+
+      - task: CopyFiles@2
+        displayName: "Copy dbo to staging area for Azure-Data"
+        inputs:
+          Contents: |
+            dbo\**
+          TargetFolder: '$(stagingarea)\dbo'
+          FlattenFolders: false
+          OverWrite: true
+      - task: CopyFiles@2
+        displayName: "Copy SalesLT to staging area"
+        inputs:
+          Contents: |
+            SalesLT\**
+          TargetFolder: '$(stagingarea)\SalesLT'
+          FlattenFolders: false
+          OverWrite: true
+      - task: CopyFiles@2
+        displayName: "Copy Security to staging area"
+        inputs:
+          Contents: |
+            Security\**
+          TargetFolder: '$(stagingarea)\Security'
+          FlattenFolders: true
+          OverWrite: true
+
+
+      - task: VSBuild@1
+        displayName: 'Build Azure-Data project'
+        inputs:
+          solution: $(stagingarea)/kcdemoazureproject.sqlproj
+          configuration: $(configuration)
+
+      - task: CopyFiles@2
+        displayName: "Copy files to artifact directory"
+        inputs:
+          Contents: |
+            **\$(stagingarea)\bin\$(configuration)\*.*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(azureartifactname)'
+          FlattenFolders: true
+          OverWrite: true
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Azure SQL database artifact'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: $(azureartifactname)
+          publishLocation: 'Container'
+
 - stage: DeployAzureDB
   dependsOn: Build
   displayName: 'Deploy to Azure SQL DB'
@@ -93,8 +170,8 @@ stages:
       variables:
         variables:
         agentpool: 'kchant DevOps Duet'
-        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
-        datadacpacfile: kcdemodbproject.dacpac
+        dacpacpath: $(System.ArtifactsDirectory)/$(azureartifactname)
+        datadacpacfile: kcdemoazureproject.dacpac
 
       pool: $(agentpool)
         
