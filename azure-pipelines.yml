@@ -156,7 +156,7 @@ stages:
       variables:
         variables:
         agentpool: 'kchant DevOps Duet'
-        dacpacpath: $(System.ArtifactsDirectory)/$(azureartifactname)
+        dacpacpath: $(System.ArtifactsDirectory)/$(azureartifactname)/staging/bin/release
         datadacpacfile: kcdemoazureproject.dacpac
 
       pool: $(agentpool)
