@@ -134,7 +134,7 @@ stages:
         displayName: "Copy files to artifact directory"
         inputs:
           Contents: |
-            $(stagingarea)\bin\$(configuration)\*.*
+            **\$(stagingarea)\bin\$(configuration)\*.*
           TargetFolder: '$(Build.ArtifactStagingDirectory)\$(azureartifactname)'
           FlattenFolders: true
           OverWrite: true
