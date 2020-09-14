@@ -116,27 +116,13 @@ stages:
         displayName: "Copy dbo to staging area for Azure-Data"
         inputs:
           Contents: |
-            $(Build.SourcesDirectory)\dbo\**
-          TargetFolder: '$(stagingarea)\dbo'
-          FlattenFolders: false
-          OverWrite: true
-      - task: CopyFiles@2
-        displayName: "Copy SalesLT to staging area"
-        inputs:
-          Contents: |
-            $(Build.SourcesDirectory)\SalesLT\**
+            $(Build.SourcesDirectory)\**
+            !$(azuredatabase)\*.sqlproj
+            !*.sqlproj
+            !azure-pipelines.yml
           TargetFolder: '$(stagingarea)'
           FlattenFolders: false
           OverWrite: true
-      - task: CopyFiles@2
-        displayName: "Copy Security to staging area"
-        inputs:
-          Contents: |
-            $(Build.SourcesDirectory)\Security\**
-          TargetFolder: '$(stagingarea)\Security'
-          FlattenFolders: true
-          OverWrite: true
-
 
       - task: VSBuild@1
         displayName: 'Build Azure-Data project'
