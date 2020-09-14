@@ -161,7 +161,7 @@ stages:
           publishLocation: 'Container'
 
 - stage: DeployAzureDB
-  dependsOn: Build
+  dependsOn: AzureBuild
   displayName: 'Deploy to Azure SQL DB'
 
   jobs:
