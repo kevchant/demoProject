@@ -130,19 +130,10 @@ stages:
           solution: $(stagingarea)/kcdemoazureproject.sqlproj
           configuration: $(configuration)
 
-      - task: CopyFiles@2
-        displayName: "Copy files to artifact directory"
-        inputs:
-          Contents: |
-            **\$(stagingarea)\bin\**
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(azureartifactname)'
-          FlattenFolders: true
-          OverWrite: true
-
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Azure SQL database artifact'
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\bin\$(configuration)'
           ArtifactName: $(azureartifactname)
           publishLocation: 'Container'
 
