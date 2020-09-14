@@ -133,7 +133,7 @@ stages:
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Azure SQL database artifact'
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\bin\$(configuration)'
+          PathtoPublish: '$(stagingarea)\bin\$(configuration)'
           ArtifactName: $(azureartifactname)
           publishLocation: 'Container'
 
@@ -147,7 +147,7 @@ stages:
       variables:
         variables:
         agentpool: 'kchant DevOps Duet'
-        dacpacpath: $(System.ArtifactsDirectory)/$(azureartifactname)/staging/bin/release
+        dacpacpath: $(System.ArtifactsDirectory)/$(azureartifactname)
         datadacpacfile: kcdemoazureproject.dacpac
 
       pool: $(agentpool)
