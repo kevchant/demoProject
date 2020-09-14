@@ -117,7 +117,7 @@ stages:
         inputs:
           Contents: |
             dbo\**
-          TargetFolder: '$(stagingarea)\dbo'
+          TargetFolder: '$(stagingarea)'
           FlattenFolders: false
           OverWrite: true
       - task: CopyFiles@2
@@ -125,7 +125,7 @@ stages:
         inputs:
           Contents: |
             SalesLT\**
-          TargetFolder: '$(stagingarea)\SalesLT'
+          TargetFolder: '$(stagingarea)'
           FlattenFolders: false
           OverWrite: true
       - task: CopyFiles@2
@@ -133,7 +133,7 @@ stages:
         inputs:
           Contents: |
             Security\**
-          TargetFolder: '$(stagingarea)\Security'
+          TargetFolder: '$(stagingarea)'
           FlattenFolders: true
           OverWrite: true
 
