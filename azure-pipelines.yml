@@ -142,6 +142,7 @@ stages:
           IpDetectionMethod: 'AutoDetect'
 
 - stage: SQL2019
+  dependsOn: Build
   displayName: 'Local SQL Server 2019 update'
 
   jobs:
