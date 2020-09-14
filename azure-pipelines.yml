@@ -116,15 +116,15 @@ stages:
         displayName: "Copy dbo to staging area for Azure-Data"
         inputs:
           Contents: |
-            dbo\**
-          TargetFolder: '$(stagingarea)'
+            $(Build.SourcesDirectory)\dbo\**
+          TargetFolder: '$(stagingarea)\dbo'
           FlattenFolders: false
           OverWrite: true
       - task: CopyFiles@2
         displayName: "Copy SalesLT to staging area"
         inputs:
           Contents: |
-            SalesLT\**
+            $(Build.SourcesDirectory)\SalesLT\**
           TargetFolder: '$(stagingarea)'
           FlattenFolders: false
           OverWrite: true
@@ -132,8 +132,8 @@ stages:
         displayName: "Copy Security to staging area"
         inputs:
           Contents: |
-            Security\**
-          TargetFolder: '$(stagingarea)'
+            $(Build.SourcesDirectory)\Security\**
+          TargetFolder: '$(stagingarea)\Security'
           FlattenFolders: true
           OverWrite: true
 
