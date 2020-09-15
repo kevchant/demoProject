@@ -35,26 +35,30 @@ stages:
         vmImage: vs2017-win2016
         
       steps:
-      - task: CopyFiles@2
-        displayName: "Copy sqlproj to staging area for Azure-Data"
-        inputs:
-          Contents: |
-            $(azuredatabase)\*.sqlproj
-          TargetFolder: '$(stagingarea)'
-          FlattenFolders: true
-          OverWrite: true
 
       - task: CopyFiles@2
-        displayName: "Copy dbo to staging area for Azure-Data"
+        displayName: "Copy files to staging area for Azure-Data"
         inputs:
           Contents: |
             $(Build.SourcesDirectory)\**
-            !$(azuredatabase)\*.sqlproj
-            !*.sqlproj
             !azure-pipelines.yml
           TargetFolder: '$(stagingarea)'
           FlattenFolders: false
           OverWrite: true
+
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Write your PowerShell commands here.
+            
+            cd..
+            cd a
+            cd staging
+            
+            rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
+            
+            (Get-Content "kcdemoazureproject.sqlproj") -replace $Old_DSP, $New_DSP  | Set-Content "kcdemoazureproject.sqlproj"
 
       - task: VSBuild@1
         displayName: 'Build Azure-Data project'
