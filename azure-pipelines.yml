@@ -17,7 +17,61 @@ trigger:
 - kcdemobranch
 
 stages:
+- stage: AzureBuild
+  dependsOn: Build
+  displayName: 'Build Azure SQL DB dacpac'
+
+  jobs:
+    - job: 'BuildAzureSQLDB'
+      displayName: 'Build Azure SQL DB dacpac'
+      variables:
+        sourcepath: $(database)-Data
+        stagingarea: $(Build.ArtifactStagingDirectory)\staging
+        destinationpath: $(azuredatabase)
+        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
+        datadacpacfile: $(azuredatabase).dacpac
+        datapublishfile: $(dacpacpath)/$(azuredatabase).publish.xml
+
+      pool: $(agentpool)
+        
+      steps:
+      - task: CopyFiles@2
+        displayName: "Copy sqlproj to staging area for Azure-Data"
+        inputs:
+          Contents: |
+            $(azuredatabase)\*.sqlproj
+          TargetFolder: '$(stagingarea)'
+          FlattenFolders: true
+          OverWrite: true
+
+      - task: CopyFiles@2
+        displayName: "Copy dbo to staging area for Azure-Data"
+        inputs:
+          Contents: |
+            $(Build.SourcesDirectory)\**
+            !$(azuredatabase)\*.sqlproj
+            !*.sqlproj
+            !azure-pipelines.yml
+          TargetFolder: '$(stagingarea)'
+          FlattenFolders: false
+          OverWrite: true
+
+      - task: VSBuild@1
+        displayName: 'Build Azure-Data project'
+        inputs:
+          solution: $(stagingarea)/kcdemoazureproject.sqlproj
+          configuration: $(configuration)
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Azure SQL database artifact'
+        inputs:
+          PathtoPublish: '$(stagingarea)\bin\$(configuration)'
+          ArtifactName: $(azureartifactname)
+          publishLocation: 'Container'
+
+
 - stage: Build
+  dependsOn: AzureBuild
   displayName: 'Build SQL 2019 dacpac'
   jobs:
     - job: 'Solution'
