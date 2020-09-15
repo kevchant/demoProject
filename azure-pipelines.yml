@@ -18,7 +18,6 @@ trigger:
 
 stages:
 - stage: AzureBuild
-  dependsOn: Build
   displayName: 'Build Azure SQL DB dacpac'
 
   jobs:
