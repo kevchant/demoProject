@@ -16,4 +16,37 @@ trigger:
 - main
 - kcdemobranch
 
+stages:
+- stage: AzureBuild
+  displayName: 'Build Azure dacpac'
+  jobs:
+    - job: 'BuildAzureSQLDB'
+      displayName: 'Build Azure SQL DB dacpac'
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+      pool:
+        vmImage: vs2017-win2016
 
+      steps:
+      - task: VSBuild@1
+        displayName: 'Build kcdemoproject for Azure SQL Database'
+        inputs:
+          solution: kcdemodbproject.sqlproj
+          configuration: $(configuration)
+
+      - task: CopyFiles@2
+        displayName: "Copy files to AzureDB artifact subfolder"
+        inputs:
+          Contents: |
+            **\bin\$(configuration)\*.*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(azureartifactname)'
+          FlattenFolders: true
+          OverWrite: true
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Azure SQL artifact'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(azureartifactname)'
+          ArtifactName: $(azureartifactname)
+          publishLocation: 'Container'
