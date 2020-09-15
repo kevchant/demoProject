@@ -16,4 +16,70 @@ trigger:
 - main
 - kcdemobranch
 
+stages:
+- stage: Build
+  displayName: 'Build SQL 2019 dacpac'
+  jobs:
+    - job: 'Solution'
 
+      pool:
+        vmImage: vs2017-win2016
+
+      steps:
+      - task: VSBuild@1
+        displayName: 'Build kcdemoproject for SQL Server 2019'
+        inputs:
+          solution: kcdemodbproject.sqlproj
+          configuration: $(configuration)
+
+      - task: CopyFiles@2
+        displayName: "Copy files to SQL2019 artifact subfolder"
+        inputs:
+          Contents: |
+            **\bin\$(configuration)\*.*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
+          FlattenFolders: true
+          OverWrite: true
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish SQL2019 artifact'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
+          ArtifactName: $(artifactname)
+          publishLocation: 'Container'
+
+- stage: SQL2019
+  dependsOn: Build
+  displayName: 'Deploy SQL 2019 update'
+
+  jobs:
+    - job: 'Deploy2019'
+      displayName: 'Deploy SQL Server 2019 update'
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
+        datadacpacfile: kcdemodbproject.dacpac
+
+      pool: $(agentpool)
+        
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Dowload Artifacts'
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          downloadPath: '$(System.ArtifactsDirectory)'
+
+      - task: SqlDacpacDeploymentOnMachineGroup@0
+        displayName: 'Install DACPAC'
+        inputs:
+          TaskType: 'dacpac'
+          DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
+          TargetMethod: 'server'
+          ServerName: 'localhost,1443'
+          DatabaseName: '$(database)'
+          AuthScheme: 'sqlServerAuthentication'
+          SqlUsername: 'sa'
+          SqlPassword: $(sqlsapw)
+          AdditionalArguments: '/p:IncludeCompositeObjects=true'
