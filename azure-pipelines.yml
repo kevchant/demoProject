@@ -31,7 +31,7 @@ stages:
         datadacpacfile: $(azuredatabase).dacpac
         datapublishfile: $(dacpacpath)/$(azuredatabase).publish.xml
 
-      pool: $(agentpool)
+      pool: vs2017-win2016
         
       steps:
       - task: CopyFiles@2
@@ -74,9 +74,10 @@ stages:
   displayName: 'Build SQL 2019 dacpac'
   jobs:
     - job: 'Solution'
-
-      pool:
-        vmImage: vs2017-win2016
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+      pool: $(agentpool)
 
       steps:
       - task: VSBuild@1
