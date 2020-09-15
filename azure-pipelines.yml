@@ -17,55 +17,34 @@ trigger:
 - kcdemobranch
 
 stages:
-- stage: AzureBuild
-  displayName: 'Build Azure SQL DB dacpac'
-
+- stage: Build
+  displayName: 'Build SQL 2019 dacpac'
   jobs:
-    - job: 'BuildAzureSQLDB'
-      displayName: 'Build Azure SQL DB dacpac'
+    - job: 'Solution'
       variables:
-        sourcepath: $(database)-Data
-        stagingarea: $(Build.ArtifactStagingDirectory)\staging
-        destinationpath: $(azuredatabase)
-        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
-        datadacpacfile: $(azuredatabase).dacpac
-        datapublishfile: $(dacpacpath)/$(azuredatabase).publish.xml
+        variables:
+        agentpool: 'kchant DevOps Duet'
+      pool: $(agentpool)
 
-      pool:
-        vmImage: vs2017-win2016
-        
       steps:
+      - task: VSBuild@1
+        displayName: 'Build kcdemoproject for SQL Server 2019'
+        inputs:
+          solution: kcdemodbproject.sqlproj
+          configuration: $(configuration)
+
       - task: CopyFiles@2
-        displayName: "Copy sqlproj to staging area for Azure-Data"
+        displayName: "Copy files to SQL2019 artifact subfolder"
         inputs:
           Contents: |
-            $(azuredatabase)\*.sqlproj
-          TargetFolder: '$(stagingarea)'
+            **\bin\$(configuration)\*.*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
           FlattenFolders: true
           OverWrite: true
 
-      - task: CopyFiles@2
-        displayName: "Copy dbo to staging area for Azure-Data"
-        inputs:
-          Contents: |
-            $(Build.SourcesDirectory)\**
-            !$(azuredatabase)\*.sqlproj
-            !*.sqlproj
-            !azure-pipelines.yml
-          TargetFolder: '$(stagingarea)'
-          FlattenFolders: false
-          OverWrite: true
-
-      - task: VSBuild@1
-        displayName: 'Build Azure-Data project'
-        inputs:
-          solution: $(stagingarea)/kcdemoazureproject.sqlproj
-          configuration: $(configuration)
-
       - task: PublishBuildArtifacts@1
-        displayName: 'Publish Azure SQL database artifact'
+        displayName: 'Publish SQL2019 artifact'
         inputs:
-          PathtoPublish: '$(stagingarea)\bin\$(configuration)'
-          ArtifactName: $(azureartifactname)
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
+          ArtifactName: $(artifactname)
           publishLocation: 'Container'
-
