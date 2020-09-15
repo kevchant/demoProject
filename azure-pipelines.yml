@@ -20,7 +20,8 @@ stages:
 - stage: Build
   displayName: 'Build SQL 2019 dacpac'
   jobs:
-    - job: 'Solution'
+    - job: 'Build2019'
+      displayName: 'Build SQL 2019 dacpac'    
       variables:
         variables:
         agentpool: 'kchant DevOps Duet'
