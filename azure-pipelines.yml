@@ -17,13 +17,68 @@ trigger:
 - kcdemobranch
 
 stages:
-- stage: Build
-  displayName: 'Build SQL 2019 dacpac'
+- stage: AzureBuild
+  displayName: 'Build Azure SQL DB dacpac'
+
   jobs:
-    - job: 'Solution'
+    - job: 'BuildAzureSQLDB'
+      displayName: 'Build Azure SQL DB dacpac'
+      variables:
+        sourcepath: $(database)-Data
+        stagingarea: $(Build.ArtifactStagingDirectory)\staging
+        destinationpath: $(azuredatabase)
+        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
+        datadacpacfile: $(azuredatabase).dacpac
+        datapublishfile: $(dacpacpath)/$(azuredatabase).publish.xml
 
       pool:
         vmImage: vs2017-win2016
+        
+      steps:
+      - task: CopyFiles@2
+        displayName: "Copy sqlproj to staging area for Azure-Data"
+        inputs:
+          Contents: |
+            $(azuredatabase)\*.sqlproj
+          TargetFolder: '$(stagingarea)'
+          FlattenFolders: true
+          OverWrite: true
+
+      - task: CopyFiles@2
+        displayName: "Copy dbo to staging area for Azure-Data"
+        inputs:
+          Contents: |
+            $(Build.SourcesDirectory)\**
+            !$(azuredatabase)\*.sqlproj
+            !*.sqlproj
+            !azure-pipelines.yml
+          TargetFolder: '$(stagingarea)'
+          FlattenFolders: false
+          OverWrite: true
+
+      - task: VSBuild@1
+        displayName: 'Build Azure-Data project'
+        inputs:
+          solution: $(stagingarea)/kcdemoazureproject.sqlproj
+          configuration: $(configuration)
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Azure SQL database artifact'
+        inputs:
+          PathtoPublish: '$(stagingarea)\bin\$(configuration)'
+          ArtifactName: $(azureartifactname)
+          publishLocation: 'Container'
+
+- stage: Build
+  dependsOn: AzureBuild
+  displayName: 'Build SQL 2019 dacpac'
+  jobs:
+    - job: 'Build2019'
+      displayName: 'Build SQL 2019 dacpac'  
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+      pool: $(agentpool)
 
       steps:
       - task: VSBuild@1
@@ -83,3 +138,43 @@ stages:
           SqlUsername: 'sa'
           SqlPassword: $(sqlsapw)
           AdditionalArguments: '/p:IncludeCompositeObjects=true'
+
+- stage: DeployAzureDB
+  dependsOn: AzureBuild
+  displayName: 'Deploy to Azure SQL DB'
+
+  jobs:
+    - job: 'Deploy2019'
+      displayName: 'Deploy Azure SQL DB'
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+        dacpacpath: $(System.ArtifactsDirectory)/$(azureartifactname)
+        datadacpacfile: kcdemoazureproject.dacpac
+
+      pool:
+        vmImage: vs2017-win2016
+        
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Dowload Artifacts'
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          artifactName:  '$(azureartifactname)'
+          downloadPath: '$(System.ArtifactsDirectory)'
+
+      - task: SqlAzureDacpacDeployment@1
+        displayName: 'Install DACPAC on Azure SQL DB'
+        inputs:
+          azureSubscription: 'Visual Studio Enterprise Subscription(170486b8-8385-407d-86a6-cff8864ec100)'
+          AuthenticationType: 'server'
+          ServerName: 'kcdemosrv.database.windows.net'
+          DatabaseName: '$(azuredatabase)'
+          SqlUsername: '$(azureuser)'
+          SqlPassword: '$(azuresqlpw)'
+          deployType: 'DacpacTask'
+          DeploymentAction: 'Publish'
+          DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
+          AdditionalArguments: '/p:IncludeCompositeObjects=true'
+          IpDetectionMethod: 'AutoDetect'
