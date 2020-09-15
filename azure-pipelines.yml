@@ -31,7 +31,8 @@ stages:
         datadacpacfile: $(azuredatabase).dacpac
         datapublishfile: $(dacpacpath)/$(azuredatabase).publish.xml
 
-      pool: vs2017-win2016
+      pool:
+        vmImage: vs2017-win2016
         
       steps:
       - task: CopyFiles@2
