@@ -1,0 +1,5 @@
+CREATE PROCEDURE [dbo].[newprocads]
+
+AS
+  SELECT 1
+RETURN 0
