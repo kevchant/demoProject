@@ -50,3 +50,42 @@ stages:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(azureartifactname)'
           ArtifactName: $(azureartifactname)
           publishLocation: 'Container'
+
+- stage: DeployAzureDB
+  dependsOn: AzureBuild
+  displayName: 'Deploy Azure SQL DB'
+
+  jobs:
+    - job: 'DeployAzureDB'
+      displayName: 'Deploy Azure SQL DB'
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+        dacpacpath: $(System.ArtifactsDirectory)/$(azureartifactname)
+        datadacpacfile: kcdemoproject.dacpac
+
+      pool: $(agentpool)
+        
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Dowload Artifacts'
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          artifactName:  '$(azureartifactname)'
+          downloadPath: '$(System.ArtifactsDirectory)'
+
+      - task: SqlAzureDacpacDeployment@1
+        displayName: 'Install DACPAC on Azure SQL DB'
+        inputs:
+          azureSubscription: 'Visual Studio Enterprise Subscription(170486b8-8385-407d-86a6-cff8864ec100)'
+          AuthenticationType: 'server'
+          ServerName: 'kcdemosrv.database.windows.net'
+          DatabaseName: '$(azuredatabase)'
+          SqlUsername: '$(azureuser)'
+          SqlPassword: '$(azuresqlpw)'
+          deployType: 'DacpacTask'
+          DeploymentAction: 'Publish'
+          DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
+          AdditionalArguments: '/p:IncludeCompositeObjects=true'
+          IpDetectionMethod: 'AutoDetect'
