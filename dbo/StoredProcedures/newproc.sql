@@ -1,5 +1,0 @@
-CREATE PROCEDURE [dbo].[newproc]
-AS 
-BEGIN
-    SELECT 1
-END
