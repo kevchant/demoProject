@@ -60,11 +60,11 @@ stages:
             
             (Get-Content "kcdemoazureproject.sqlproj") -replace $Old_DSP, $New_DSP  | Set-Content "kcdemoazureproject.sqlproj"
 
-            - task: VSBuild@1
-              displayName: 'Build Azure-Data project'
-              inputs:
-                solution: $(stagingarea)/kcdemoazureproject.sqlproj
-                configuration: $(configuration)
+      - task: VSBuild@1
+        displayName: 'Build Azure-Data project'
+        inputs:
+          solution: $(stagingarea)/kcdemoazureproject.sqlproj
+          configuration: $(configuration)
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Azure SQL database artifact'
