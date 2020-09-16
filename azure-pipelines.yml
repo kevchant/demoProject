@@ -57,7 +57,7 @@ stages:
             cd a
             cd staging
             
-            $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider'
+            $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider'
             $New_DSP = 'Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider'
             
             rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
