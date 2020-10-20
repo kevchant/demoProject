@@ -1,5 +1,5 @@
 CREATE TABLE [SalesLT].[SalesOrderHeader] (
-    [SalesOrderID]           INT                   CONSTRAINT [DF_SalesOrderHeader_OrderID] DEFAULT (NEXT VALUE FOR [SalesLT].[SalesOrderNumber]) NOT NULL,
+    [SalesOrderID]           INT                   IDENTITY(1,1)--CONSTRAINT [DF_SalesOrderHeader_OrderID] DEFAULT (NEXT VALUE FOR [SalesLT].[SalesOrderNumber]) NOT NULL,
     [RevisionNumber]         TINYINT               CONSTRAINT [DF_SalesOrderHeader_RevisionNumber] DEFAULT ((0)) NOT NULL,
     [OrderDate]              DATETIME              CONSTRAINT [DF_SalesOrderHeader_OrderDate] DEFAULT (getdate()) NOT NULL,
     [DueDate]                DATETIME              NOT NULL,
