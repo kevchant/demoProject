@@ -12,7 +12,6 @@ variables:
   azureartifactname: AzureSQLDB
 
 trigger:
-- master
 - main
 - kcdemobranch
 
