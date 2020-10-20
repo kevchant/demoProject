@@ -6,9 +6,9 @@
 variables:
   configuration: release
   sqlinstance: localhost
-  database: SQL2019DB
+  database: SQL2008DB
   azuredatabase: AzureDB
-  artifactname: SQL2019
+  artifactname: SQL2008
   azureartifactname: AzureSQLDB
 
 trigger:
@@ -56,7 +56,7 @@ stages:
             cd a
             cd staging
             
-            $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider'
+            $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider'
             $New_DSP = 'Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider'
             
             rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
@@ -78,10 +78,10 @@ stages:
 
 - stage: Build
   dependsOn: AzureBuild
-  displayName: 'Build SQL 2019 dacpac'
+  displayName: 'Build SQL 2008 dacpac'
   jobs:
-    - job: 'Build2019'
-      displayName: 'Build SQL 2019 dacpac'  
+    - job: 'Build2008'
+      displayName: 'Build SQL 2008 dacpac'  
       variables:
         variables:
         agentpool: 'kchant DevOps Duet'
@@ -89,13 +89,13 @@ stages:
 
       steps:
       - task: VSBuild@1
-        displayName: 'Build kcdemoproject for SQL Server 2019'
+        displayName: 'Build kcdemoproject for SQL Server 2008'
         inputs:
           solution: kcdemodbproject.sqlproj
           configuration: $(configuration)
 
       - task: CopyFiles@2
-        displayName: "Copy files to SQL2019 artifact subfolder"
+        displayName: "Copy files to 2008 artifact subfolder"
         inputs:
           Contents: |
             **\bin\$(configuration)\*.*
@@ -104,19 +104,19 @@ stages:
           OverWrite: true
 
       - task: PublishBuildArtifacts@1
-        displayName: 'Publish SQL2019 artifact'
+        displayName: 'Publish SQL2008 artifact'
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(artifactname)'
           ArtifactName: $(artifactname)
           publishLocation: 'Container'
 
-- stage: SQL2019
+- stage: SQL2008
   dependsOn: Build
-  displayName: 'Deploy SQL 2019 update'
+  displayName: 'Deploy SQL 2008 update'
 
   jobs:
-    - job: 'Deploy2019'
-      displayName: 'Deploy SQL Server 2019 update'
+    - job: 'Deploy2008'
+      displayName: 'Deploy SQL Server 2008 update'
       variables:
         variables:
         agentpool: 'kchant DevOps Duet'
@@ -151,7 +151,7 @@ stages:
   displayName: 'Deploy to Azure SQL DB'
 
   jobs:
-    - job: 'Deploy2019'
+    - job: 'Deploy2008'
       displayName: 'Deploy Azure SQL DB'
       variables:
         variables:
