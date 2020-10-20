@@ -7,8 +7,10 @@ variables:
   configuration: release
   sqlinstance: localhost
   database: SQL2008DB
+  2019database: SQL2019DB
   azuredatabase: AzureDB
   artifactname: SQL2008
+  2019artifactname: SQL2019
   azureartifactname: AzureSQLDB
 
 trigger:
@@ -127,10 +129,10 @@ stages:
             cd a
             cd staging
             
+            rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
+
             $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider'
             $New_DSP = 'Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider'
-            
-            rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
             
             (Get-Content "kcdemoazureproject.sqlproj") -replace $Old_DSP, $New_DSP  | Set-Content "kcdemoazureproject.sqlproj"
 
