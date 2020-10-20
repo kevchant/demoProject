@@ -227,7 +227,7 @@ stages:
             ls
             cd..
             cd a
-            cd staging
+            cd 2019staging
 
             rename-item kcdemodbproject.sqlproj kcdemo2019project.sqlproj            
 
