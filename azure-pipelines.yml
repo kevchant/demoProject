@@ -81,7 +81,7 @@ stages:
           TaskType: 'dacpac'
           DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
           TargetMethod: 'server'
-          ServerName: '52.136.228.86,1433'
+          ServerName: '23.97.145.217,1433'
           DatabaseName: '$(database)'
           AuthScheme: 'sqlServerAuthentication'
           SqlUsername: 'sa'
@@ -128,7 +128,7 @@ stages:
             cd..
             cd a
             cd staging
-            
+
             rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
 
             $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider'
