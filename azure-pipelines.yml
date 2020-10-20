@@ -278,7 +278,7 @@ stages:
           TaskType: 'dacpac'
           DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
           TargetMethod: 'server'
-          ServerName: 'localhost,1433'
+          ServerName: 'localhost,1443'
           DatabaseName: '$(database)'
           AuthScheme: 'sqlServerAuthentication'
           SqlUsername: 'sa'
