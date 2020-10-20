@@ -52,7 +52,7 @@ stages:
           ArtifactName: $(artifactname)
           publishLocation: 'Container'
 
-- stage: SQL2008
+- stage: SQL2008Deploy
   dependsOn: SQL2008Build
   displayName: 'Deploy SQL 2008 update'
 
@@ -188,3 +188,99 @@ stages:
           DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
           AdditionalArguments: '/p:IncludeCompositeObjects=true'
           IpDetectionMethod: 'AutoDetect'
+
+- stage: SQL2019Build
+  dependsOn: SQL2008Deploy
+  displayName: 'Build SQL 2019 dacpac'
+  jobs:
+    - job: 'Build2019'
+      displayName: 'Build SQL 2019 dacpac'  
+      variables:
+        variables:
+        sourcepath: $(2019database)-Data
+        stagingarea: $(Build.ArtifactStagingDirectory)\2019staging
+        destinationpath: $(2019database)
+        dacpacpath: $(System.ArtifactsDirectory)/$(2019artifactname)
+        datadacpacfile: $(2019database).dacpac
+        datapublishfile: $(dacpacpath)/$(2019database).publish.xml
+        agentpool: 'kchant DevOps Duet'
+      pool: $(agentpool)
+        
+      steps:
+
+      - task: CopyFiles@2
+        displayName: "Copy files to staging area for SQL2019"
+        inputs:
+          Contents: |
+            $(Build.SourcesDirectory)\**
+            !azure-pipelines.yml
+          TargetFolder: '$(stagingarea)'
+          FlattenFolders: false
+          OverWrite: true
+
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Write your PowerShell commands here.
+            
+            ls
+            cd..
+            cd a
+            cd staging
+
+            rename-item kcdemodbproject.sqlproj kcdemo2019project.sqlproj            
+
+            $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider'
+            $New_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider'
+                       
+            (Get-Content "kcdemo2019project.sqlproj") -replace $Old_DSP, $New_DSP  | Set-Content "kcdemo2019project.sqlproj"
+
+      - task: VSBuild@1
+        displayName: 'Build SQL2019 project'
+        inputs:
+          solution: $(stagingarea)/kcdemo2019project.sqlproj
+          configuration: $(configuration)
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish SQL 2019 database artifact'
+        inputs:
+          PathtoPublish: '$(stagingarea)\bin\$(configuration)'
+          ArtifactName: $(2019artifactname)
+          publishLocation: 'Container'
+
+- stage: SQL2019
+  dependsOn: SQL2019Build
+  displayName: 'Deploy SQL 2019 update'
+
+  jobs:
+    - job: 'Deploy2019'
+      displayName: 'Deploy SQL Server 2019 update'
+      variables:
+        variables:
+        agentpool: 'kchant DevOps Duet'
+        dacpacpath: $(System.ArtifactsDirectory)/$(2019artifactname)
+        datadacpacfile: kcdemo2019project.dacpac
+
+      pool: $(agentpool)
+        
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Dowload Artifacts'
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          downloadPath: '$(System.ArtifactsDirectory)'
+
+      - task: SqlDacpacDeploymentOnMachineGroup@0
+        displayName: 'Install DACPAC'
+        inputs:
+          TaskType: 'dacpac'
+          DacpacFile: '$(dacpacpath)/$(datadacpacfile)'
+          TargetMethod: 'server'
+          ServerName: 'localhost,1433'
+          DatabaseName: '$(database)'
+          AuthScheme: 'sqlServerAuthentication'
+          SqlUsername: 'sa'
+          SqlPassword: $(sqlsapw)
+          AdditionalArguments: '/p:IncludeCompositeObjects=true'
