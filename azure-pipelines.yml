@@ -12,6 +12,8 @@ variables:
   artifactname: SQL2008
   2019artifactname: SQL2019
   azureartifactname: AzureSQLDB
+  azuresyndatabase: kcsyndemodw
+  azuresynartifactname: AzureSQLDB
 
 trigger:
 - main
@@ -284,3 +286,64 @@ stages:
           SqlUsername: 'sa'
           SqlPassword: $(sqlsapw)
           AdditionalArguments: '/p:IncludeCompositeObjects=true'
+
+- stage: AzureSynBuild
+  dependsOn: SQL2008Build
+  displayName: 'Build Azure Synapse dacpac'
+
+  jobs:
+    - job: 'BuildAzureSynapseDB'
+      displayName: 'Build Azure Synapse dacpac'
+      variables:
+        sourcepath: $(database)-Data
+        stagingarea: $(Build.ArtifactStagingDirectory)\synstaging
+        destinationpath: $(azuredatabase)
+        dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
+        datadacpacfile: $(azuredatabase).dacpac
+        datapublishfile: $(dacpacpath)/$(azuredatabase).publish.xml
+
+      pool:
+        vmImage: vs2017-win2016
+        
+      steps:
+
+      - task: CopyFiles@2
+        displayName: "Copy files to staging area for Azure Synapse"
+        inputs:
+          Contents: |
+            $(Build.SourcesDirectory)\**
+            !azure-pipelines.yml
+          TargetFolder: '$(stagingarea)'
+          FlattenFolders: false
+          OverWrite: true
+
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Write your PowerShell commands here.
+            
+            ls
+            cd..
+            cd a
+            cd staging
+
+            rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
+
+            $Old_DSP = 'Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider'
+            $New_DSP = 'Microsoft.Data.Tools.Schema.Sql.SqlDwDatabaseSchemaProvider'
+            
+            (Get-Content "kcdemoazureproject.sqlproj") -replace $Old_DSP, $New_DSP  | Set-Content "kcdemoazureproject.sqlproj"
+
+      - task: VSBuild@1
+        displayName: 'Build Azure Syn project'
+        inputs:
+          solution: $(stagingarea)/kcdemoazureproject.sqlproj
+          configuration: $(configuration)
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Azure Synapse artifact'
+        inputs:
+          PathtoPublish: '$(stagingarea)\bin\$(configuration)'
+          ArtifactName: $(azuresynartifactname)
+          publishLocation: 'Container'
