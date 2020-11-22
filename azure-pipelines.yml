@@ -324,10 +324,7 @@ stages:
             # Write your PowerShell commands here.
             
             ls
-            cd..
-            cd a
-            cd synstaging\$(database)-Data
-            ls
+            cd $(synstagingarea)
 
             rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
 
