@@ -323,10 +323,10 @@ stages:
           script: |
             # Write your PowerShell commands here.
             
-            ls
             cd..
             cd a
-            cd staging
+            cd staging\$(database)-Data
+            ls
 
             rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
 
