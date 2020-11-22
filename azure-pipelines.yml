@@ -296,7 +296,7 @@ stages:
       displayName: 'Build Azure Synapse dacpac'
       variables:
         sourcepath: $(database)-Data
-        stagingarea: $(Build.ArtifactStagingDirectory)\synstaging
+        synstagingarea: $(Build.ArtifactStagingDirectory)\synstaging
         destinationpath: $(azuredatabase)
         dacpacpath: $(System.ArtifactsDirectory)/$(artifactname)
         datadacpacfile: $(azuredatabase).dacpac
@@ -313,7 +313,7 @@ stages:
           Contents: |
             $(Build.SourcesDirectory)\**
             !azure-pipelines.yml
-          TargetFolder: '$(stagingarea)'
+          TargetFolder: '$(synstagingarea)'
           FlattenFolders: false
           OverWrite: true
 
@@ -326,7 +326,7 @@ stages:
             ls
             cd..
             cd a
-            cd staging\$(database)-Data
+            cd synstaging\$(database)-Data
             ls
 
             rename-item kcdemodbproject.sqlproj kcdemoazureproject.sqlproj
@@ -339,12 +339,12 @@ stages:
       - task: VSBuild@1
         displayName: 'Build Azure Syn project'
         inputs:
-          solution: $(stagingarea)/kcdemoazureproject.sqlproj
+          solution: $(synstagingarea)/kcdemoazureproject.sqlproj
           configuration: $(configuration)
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Azure Synapse artifact'
         inputs:
-          PathtoPublish: '$(stagingarea)\bin\$(configuration)'
+          PathtoPublish: '$(synstagingarea)\bin\$(configuration)'
           ArtifactName: $(azuresynartifactname)
           publishLocation: 'Container'
