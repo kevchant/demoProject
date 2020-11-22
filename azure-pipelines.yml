@@ -323,6 +323,7 @@ stages:
           script: |
             # Write your PowerShell commands here.
             
+            ls
             cd..
             cd a
             cd staging\$(database)-Data
